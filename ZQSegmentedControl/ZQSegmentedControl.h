@@ -14,6 +14,12 @@ typedef NS_ENUM(NSUInteger, ZQSegmentedControlOrientation) {
 };
 
 @interface ZQSegmentedControl : UISegmentedControl
+/**
+ If YES, user can slide your finger on segments like UISlider. Default is NO.
+ */
 @property (nonatomic) BOOL canSlide;
+/**
+ The orientation of the SegmentedControl. Default is Horizontal.
+ */
 @property (nonatomic) ZQSegmentedControlOrientation orientation;
 @end
