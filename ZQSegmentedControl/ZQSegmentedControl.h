@@ -34,6 +34,7 @@ typedef NS_ENUM(NSUInteger, ZQSegmentedControlPopViewDirection) {
 @property (nonatomic) ZQSegmentedControlOrientation orientation;
 @property (weak) id<ZQSegmentControlDataSource> datasource;
 @property (nonatomic) BOOL showPopView;
+@property (nonatomic) NSTimeInterval popViewTimeOut;
 @property (nonatomic) ZQSegmentedControlPopViewDirection popDirection;
 @property (nonatomic) CGFloat popArrowLength;
 @property (nonatomic) CGFloat popCornerRadius;

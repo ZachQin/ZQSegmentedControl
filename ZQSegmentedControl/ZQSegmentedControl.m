@@ -20,6 +20,7 @@
 
 @implementation ZQSegmentedControl {
     CAShapeLayer *_popShapeLayer;
+    NSTimer *_popTimer;
     NSString *_currentPopTitle;
     NSInteger _popSegmentIndex;
     CGFloat _widthPopPadding;
@@ -53,7 +54,7 @@
     _popDirection = ZQSegmentedControlAbove;
     _popArrowLength = 13.0;
     _popCornerRadius = 4.0;
-    
+    _popViewTimeOut = 20.0;
     
     _popBackgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
     _popTitleColor = [UIColor whiteColor];
@@ -229,6 +230,10 @@
 
 - (void)showPopViewAtIndex:(NSInteger)index title:(NSString *)title {
     _popView.hidden = NO;
+    if (_popTimer) {
+        [_popTimer invalidate];
+    }
+    
     CGSize popSize = [self popSizeFromString];
     [self updatePopFrameFromPopSize:popSize];
     UIBezierPath *popPath = [self pathForRect:CGRectMake(0, 0, popSize.width, popSize.height) withArrowOffset:0];
@@ -240,6 +245,11 @@
     }
     _popShapeLayer.path = popPath.CGPath;
     _popLabel.text = title;
+    _popTimer = [NSTimer scheduledTimerWithTimeInterval:_popViewTimeOut target:self selector:@selector(timeOut:) userInfo:nil repeats:NO];
+}
+
+- (void)timeOut:(NSTimer *)timer {
+    _popView.hidden = YES;
 }
 
 @end
