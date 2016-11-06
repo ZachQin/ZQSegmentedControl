@@ -9,8 +9,9 @@
 #import "ViewController.h"
 #import "ZQSegmentedControl.h"
 
-@interface ViewController ()
+@interface ViewController () <ZQSegmentControlDataSource>
 @property (nonatomic, strong) ZQSegmentedControl *sc;
+@property (nonatomic, strong) NSDictionary *table;
 @end
 
 @implementation ViewController
@@ -18,15 +19,32 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    self.sc = [[ZQSegmentedControl alloc] initWithItems:@[@"1", @"2", @"3", @"4"]];
-    self.sc.frame = CGRectMake(100, 100, 400, 400);
+    self.table = @{@"Monday" : @"Mon.",
+                            @"Tuesday" : @"Tues.",
+                            @"Wednesday" : @"Wed.",
+                            @"Thursday" : @"Thurs.",
+                            @"Friday" : @"Fri.",
+                            @"Saturday" : @"Sat.",
+                            @"Sunday" : @"Sun."
+                            };
+    
+    self.sc = [[ZQSegmentedControl alloc] initWithItems:@[@"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday", @"Sunday"]];
+    self.sc.frame = CGRectMake(100, 100, 100, 300);
     self.sc.orientation = ZQSegmentedControlVertical;
+    self.sc.popDirection = ZQSegmentedControlBelow;
     [self.sc addTarget:self action:@selector(action:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:self.sc];
+    self.sc.datasource = self;
+    self.sc.popBackgroundColor = [UIColor purpleColor];
 }
 
 - (void)action:(UISegmentedControl *)sc {
-    
+    NSLog(@"Select %ld segment.", (long)sc.selectedSegmentIndex);
+}
+
+- (NSString *)segmentControl:(ZQSegmentedControl *)segmentControl popViewTitleForIndex:(NSInteger)index {
+    NSString *itemTitle = [self.sc titleForSegmentAtIndex:index];
+    return self.table[itemTitle];
 }
 
 - (void)didReceiveMemoryWarning {
