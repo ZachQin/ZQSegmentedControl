@@ -11,6 +11,7 @@
 @interface UISegmentedControl()
 - (void)highlightSegment:(int)index;
 - (void)_setSelectedSegmentIndex:(long long)arg1 notify:(bool)arg2 animate:(bool)arg3;
+- (void)_setHighlightedSegmentHighlighted:(bool)arg1;
 @end
 
 @interface ZQSegmentedControl ()
@@ -20,6 +21,7 @@
 
 @implementation ZQSegmentedControl {
     CAShapeLayer *_popShapeLayer;
+    CAShapeLayer *_cornerMaskLayer;
     NSTimer *_popTimer;
     NSString *_currentPopTitle;
     NSInteger _popSegmentIndex;
@@ -55,6 +57,7 @@
     _popArrowLength = 13.0;
     _popCornerRadius = 4.0;
     _popViewTimeOut = 20.0;
+    _segmentCornerRadius = 4;
     
     _popBackgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
     _popTitleColor = [UIColor whiteColor];
@@ -73,20 +76,38 @@
     _popLabel.textColor = _popTitleColor;
     [_popView addSubview:_popLabel];
     [self addSubview:_popView];
+    
+    // ------Appearance
+    self.tintColor = [UIColor blackColor];
+    UIImage *backgroundImage = [self imageWithColor:[UIColor colorWithWhite:0 alpha:0.3] size:CGSizeMake(10, 10) corner:0];
+    UIImage *selectedImage = [self imageWithColor:[UIColor colorWithWhite:0 alpha:0.8] size:CGSizeMake(10, 10) corner:0];
+    [self setBackgroundImage:backgroundImage forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+    [self setBackgroundImage:selectedImage forState:UIControlStateSelected barMetrics:UIBarMetricsDefault];
+    
+    _cornerMaskLayer = [CAShapeLayer layer];
+    self.layer.mask = _cornerMaskLayer;
 }
 
 #pragma mark - **************** override
 - (void)highlightSegment:(int)index {
-    [super highlightSegment:index];
     if (self.canSlide) {
         if (index != -1) {
             [self _setSelectedSegmentIndex:index notify:YES animate:YES];
         }
+    } else {
+        [super highlightSegment:index];
     }
 }
 
+
+/**
+ Override to fix crash bug. Leave it empty.
+ */
+- (void)_setHighlightedSegmentHighlighted:(bool)arg1 {
+}
+
 - (void)_setSelectedSegmentIndex:(long long)arg1 notify:(bool)arg2 animate:(bool)arg3 {
-    if (arg1 == self.selectedSegmentIndex) {
+    if (arg1 == self.selectedSegmentIndex || arg1 == -1) {
         return;
     }
     if ([self.datasource respondsToSelector:@selector(segmentControl:popViewTitleForIndex:)]) {
@@ -99,6 +120,13 @@
     [super _setSelectedSegmentIndex:arg1 notify:arg2 animate:arg3];
 }
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:_segmentCornerRadius];
+    [path appendPath:[UIBezierPath bezierPathWithRect:_popView.frame]];
+    _cornerMaskLayer.path = path.CGPath;
+}
+
 #pragma mark - **************** setter/getter
 
 - (void)setOrientation:(ZQSegmentedControlOrientation)orientation {
@@ -107,9 +135,6 @@
     if (orientation == ZQSegmentedControlVertical) {
         self.transform = CGAffineTransformMakeRotation(M_PI / 2.0);
         [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull view, NSUInteger idx, BOOL * _Nonnull stop) {
-//            if (view == _popView) {
-//                return;
-//            }
             [view.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull subView, NSUInteger idx, BOOL * _Nonnull stop) {
                 if ([subView isKindOfClass:[UILabel class]]) {
                     subView.transform = CGAffineTransformMakeRotation(- M_PI / 2.0);
@@ -250,6 +275,16 @@
 
 - (void)timeOut:(NSTimer *)timer {
     _popView.hidden = YES;
+}
+
+- (UIImage *)imageWithColor:(UIColor *)color size:(CGSize)size corner:(CGFloat)corner {
+    UIGraphicsBeginImageContextWithOptions(size, NO, [UIScreen mainScreen].scale);
+    [color setFill];
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:(CGRect){0, 0, size} cornerRadius:corner];
+    [path fill];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
 }
 
 @end

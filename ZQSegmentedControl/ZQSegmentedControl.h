@@ -31,6 +31,8 @@ typedef NS_ENUM(NSUInteger, ZQSegmentedControlPopViewDirection) {
 /**
  The orientation of the SegmentedControl. Default is Horizontal.
  */
+@property (nonatomic) CGFloat segmentCornerRadius;
+
 @property (nonatomic) ZQSegmentedControlOrientation orientation;
 @property (weak) id<ZQSegmentControlDataSource> datasource;
 @property (nonatomic) BOOL showPopView;
